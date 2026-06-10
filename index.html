@@ -200,7 +200,7 @@
             <div class="deck-bg-card" style="top: 5px; transform: scale(0.98); opacity: 0.85;"></div>
             
             <div class="card" id="mainCard" onclick="cardAction()">
-                <div class="card-face card-front" id="frontFace">Картаа эргүүл чапахгүй бол 1 уу</div>
+                <div class="card-face card-front" id="frontFace">Картаа эргүүл чадахгүй бол 1 уу</div>
                 <div class="card-face card-back" id="backFace">Даалгавар энд гарна</div>
             </div>
         </div>
@@ -238,7 +238,7 @@
         function getNextTask() {
             if (availableTasks.length === 0) {
                 availableTasks = [...tasks];
-                alert('Бүх даалгаврыг дуусгалаа! Даалгаврууд шинээр эхэлж байна.');
+                alert('Бүх даалгаврыг дуусгалаа! Согтож чадаагүй бол даалгавруудыг шинээр эхлүүлж байна.');
             }
             const randomIndex = Math.floor(Math.random() * availableTasks.length);
             currentTask = availableTasks[randomIndex];
