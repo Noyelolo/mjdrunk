@@ -249,15 +249,12 @@
             const card = document.getElementById('mainCard');
 
             if (!isRevealed) {
-                // Санамж гаргаж ирэх
-                if (confirm("Эргүүлэх гэж байна, итгэлтэй байна уу бро?")) {
-                    // Ар талын текстийг шинэчлэх
-                    document.getElementById('backFace').innerHTML = `${currentTask}<div class="card-instruction">Дараагийн карт руу шилжих бол дарна уу</div>`;
-                    
-                    // Картыг эргүүлэх класс нэмэх
-                    card.classList.add('flipped');
-                    isRevealed = true;
-                }
+                // Ар талын текстийг шинэчлэх
+                document.getElementById('backFace').innerHTML = `${currentTask}<div class="card-instruction">Дараагийн карт руу шилжих бол дарна уу</div>`;
+                
+                // Картыг эргүүлэх класс нэмэх
+                card.classList.add('flipped');
+                isRevealed = true;
             } else {
                 // Ил гарсан картыг дээш хөөрч алга болгох хөдөлгөөн
                 card.classList.add('slide-out');
