@@ -54,6 +54,7 @@
             box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
             text-transform: uppercase;
             font-weight: bold;
+            outline: none;
         }
 
         .btn:hover {
@@ -65,35 +66,23 @@
         #game-screen {
             display: none;
             width: 100%;
-            max-width: 1200px;
+            max-width: 600px;
             padding: 20px;
             text-align: center;
-        }
-
-        .game-header {
-            margin-bottom: 20px;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-        }
-
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 20px;
             justify-content: center;
+            min-height: 80vh;
         }
 
-        @media (max-width: 600px) {
-            .card-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        /* Картын эргэх 3D эффект */
+        /* Ганц картын загвар */
         .card-container {
             perspective: 1000px;
-            height: 200px;
+            width: 100%;
+            max-width: 350px;
+            height: 450px;
+            margin-bottom: 30px;
         }
 
         .card {
@@ -101,9 +90,9 @@
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.6s;
+            transition: transform 0.5s ease-in-out;
             cursor: pointer;
-            border-radius: 10px;
+            border-radius: 20px;
         }
 
         .card.flipped {
@@ -115,30 +104,50 @@
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            border-radius: 10px;
+            border-radius: 20px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 3px solid #e94560;
         }
 
         .card-front {
             background: linear-gradient(135deg, #0f3460, #16213e);
             color: #fff;
-            border: 2px solid #e94560;
+            font-size: 1.5rem;
             font-weight: bold;
-            font-size: 1.2rem;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .card-back {
             background: linear-gradient(135deg, #e94560, #ff2e63);
             color: white;
             transform: rotateY(180deg);
-            font-size: 0.9rem;
+            font-size: 1.2rem;
             text-align: center;
-            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        .card-instruction {
+            font-size: 0.85rem;
+            margin-top: 15px;
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .card-container {
+                height: 400px;
+            }
         }
     </style>
 </head>
@@ -150,24 +159,30 @@
     </div>
 
     <div id="game-screen">
-        <div class="game-header">
-            <h2>Картууд</h2>
-            <button class="btn" onclick="resetGame()" style="padding: 10px 20px; font-size: 0.9rem;">Дахин эхлүүлэх</button>
-        </div>
-        <div class="card-grid" id="grid">
+        <div class="card-container">
+            <div class="card" id="mainCard" onclick="nextTask()">
+                <div class="card-front">
+                    Карт татах
+                    <div class="card-instruction">Дарж даалгавар авна уу</div>
+                </div>
+                <div class="card-back" id="taskText">Даалгавар энд гарна</div>
             </div>
+        </div>
+        <div class="controls">
+            <button class="btn" onclick="nextTask()" style="padding: 12px 30px; font-size: 1rem;">Дараагийн даалгавар</button>
+        </div>
     </div>
 
     <script>
-        // Таны өмнөх даалгавруудаас түүврийн журмаар оруулсан сан
+        // Бүх даалгаврын сан
         const tasks = [
             "Фэйсбүүк чатад ороод онлайн байгаа 3 дахь хүнээс '10к зээлээч' гэж асуу. Чадахгүй бол 4 уу.",
             "Хамгийн сүүлд чат бичсэн хүн рүүгээ 'Би чамд нууцлаг хайртай болчихсон юм шиг байна' гэж бич. Үгүй бол 3 удаа уу.",
             "Инстаграм/Фэйсбүүк стори дээрээ 'Би өнөөдөр жирэмсэн/хүүхэдтэй боллоо' гэж тайлбаргүй постло. 4 уу.",
             "5 дахь харилцах хүн рүүгээ залгаад шалтгаангүйгээр чанга инээгээд утсаа тасал. Үгүй бол 3 уу.",
             "Фэйсбүүкийн хамгийн сүүлийн зураг дээрээ эксээ таг хий. Үгүй бол 2 удаа уу.",
-            "Санамсаргүй танил руугаа өөрийнхөө хөлийг зурсан зураг явуул. Чадахгүй бол 4 удаа уу.",
-            "Сторис дээрээ 'Надад мөнгө хэрэгтэй байна, 5000₮ шилжүүлээч' гэж постло. Үгүй бол 3 удаа уу.",
+            "Санамсаргүй танил руугаа өөрийнхөө хөлийг зурсан зураг явуул. Чадахгүй бол 4 уу.",
+            "Сторис дээрээ 'Надад мөнгө хэрэгтэй байна, 5000₮ шилжүүлээч' гэж постло. Үгүй бол 3 уу.",
             "Ээж аав руугаа залгаад 'Би гадаад явлаа' гэж хэлээд утсаа тасал. 4 удаа уу.",
             "Найз руугаа залгаад 'Таксины мөнгө явуулаач' гэж худлаа ярь. 3 удаа уу.",
             "Баруун талын хүнийхээ магнай дээр уруулын будгаар зүрх зур. 3 удаа уу.",
@@ -178,46 +193,42 @@
             "Найз залуу/охин руугаа залгаад 'Би чамаас салж байна' гэж хэлээд 5 секунд чимээгүй бай. 5 уу."
         ];
 
+        let availableTasks = [...tasks];
+
         function startGame() {
             document.getElementById('intro-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'block';
-            renderCards();
+            document.getElementById('game-screen').style.display = 'flex';
         }
 
-        function getRandomTasks(num) {
-            // Санамсаргүй байдлаар даалгавруудыг хольж сонгох
-            const shuffled = [...tasks].sort(() => 0.5 - Math.random());
-            return shuffled.slice(0, num);
-        }
+        function nextTask() {
+            const card = document.getElementById('mainCard');
+            
+            // Хэрэв бүх даалгавар дууссан бол санг дахин шинэчлэх
+            if (availableTasks.length === 0) {
+                availableTasks = [...tasks];
+                alert('Бүх даалгаврыг дуусгалаа! Даалгаврууд шинээр эхэлж байна.');
+            }
 
-        function renderCards() {
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            // Дэлгэц дээр 12 ширхэг карт гаргах (буюу 12 даалгавар)
-            const selectedTasks = getRandomTasks(12);
+            // Санамсаргүй индекс олох
+            const randomIndex = Math.floor(Math.random() * availableTasks.length);
+            const selectedTask = availableTasks[randomIndex];
 
-            selectedTasks.forEach((task, index) => {
-                const cardContainer = document.createElement('div');
-                cardContainer.className = 'card-container';
-                
-                cardContainer.innerHTML = `
-                    <div class="card" onclick="flipCard(this)">
-                        <div class="card-front">Карт ${index + 1}</div>
-                        <div class="card-back">${task}</div>
-                    </div>
-                `;
-                grid.appendChild(cardContainer);
-            });
-        }
+            // Сонгогдсон даалгаврыг сангаас хасах (ингэснээр давтагдахгүй)
+            availableTasks.splice(randomIndex, 1);
 
-        function flipCard(card) {
-            // Картыг дарахад эргэх эффект
-            card.classList.toggle('flipped');
-        }
+            // Картын ар тал руу текстийг шилжүүлж бичих
+            document.getElementById('taskText').innerText = selectedTask;
 
-        function resetGame() {
-            // Картуудыг шинээр рандомлож дахин ачаалах
-            renderCards();
+            // Эргэх эффектийг идэвхжүүлэх
+            card.classList.add('flipped');
+
+            // Дараагийн дарах үед эффектийг буцааж хураах, гэхдээ текстийг секундийн дараа солихгүйн тулд шууд эргэлтийг хадгалав
+            // Дараагийн карт дээр дарахад эхлээд буцааж эргүүлээд шинэ даалгавар оноохын тулд товчлуурыг арай өөрөөр ашиглаж болно.
+            // Илүү хялбараар шинэчлэх бол картыг дахин дарахад буцааж эргэдэг байлгаж болно:
+            
+            setTimeout(() => {
+                // Энд дараагийн картыг бэлдэх логик нэмж болно. Одоогийн байдлаар шууд эргээд харагдана.
+            }, 500);
         }
     </script>
 </body>
