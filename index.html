@@ -81,6 +81,7 @@
             max-width: 350px;
             height: 450px;
             margin-bottom: 30px;
+            perspective: 1000px; /* 3D эффектэд зайлшгүй шаардлагатай */
         }
 
         /* Овоолсон харагдуулах дэвсгэр картууд */
@@ -102,17 +103,17 @@
         /* Шинэ карт гарч ирэх Animation */
         @keyframes drawCard {
             0% {
-                transform: scale(0.7) translateY(50px);
+                transform: scale(0.7) translateY(50px) rotateY(0deg);
                 opacity: 0;
             }
             100% {
-                transform: scale(1) translateY(0);
+                transform: scale(1) translateY(0) rotateY(0deg);
                 opacity: 1;
             }
         }
 
         .animate-in {
-            animation: drawCard 0.4s ease-out forwards;
+            animation: drawCard 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
         /* Идэвхтэй дээд талын карт */
@@ -120,6 +121,30 @@
             position: absolute;
             width: 100%;
             height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
+            cursor: pointer;
+            z-index: 1;
+            user-select: none;
+        }
+
+        /* Карт эргэх төлөв */
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* Карт алга болох хөдөлгөөн */
+        .card.slide-out {
+            transform: rotateY(180deg) translateY(-100px) scale(0.8);
+            opacity: 0;
+        }
+
+        /* Картын нүүр болон ар тал */
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden; /* Ар тал нь эргэхэд харагдахгүй байх */
             border-radius: 20px;
             display: flex;
             flex-direction: column;
@@ -128,13 +153,9 @@
             padding: 30px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.7);
             border: 3px solid #e94560;
-            cursor: pointer;
-            z-index: 1;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            user-select: none;
         }
 
-        .card.cover {
+        .card-front {
             background: linear-gradient(135deg, #0f3460, #16213e);
             font-size: 1.5rem;
             font-weight: bold;
@@ -143,12 +164,13 @@
             color: #fff;
         }
 
-        .card.revealed {
+        .card-back {
             background: linear-gradient(135deg, #e94560, #ff2e63);
             color: white;
             font-size: 1.2rem;
             text-align: center;
             line-height: 1.6;
+            transform: rotateY(180deg); /* Ар талыг эхэнд нь эргүүлж тавих */
         }
 
         .card-instruction {
@@ -176,7 +198,11 @@
         <div class="deck-container">
             <div class="deck-bg-card"></div>
             <div class="deck-bg-card" style="top: 5px; transform: scale(0.98); opacity: 0.85;"></div>
-            <div class="card cover" id="mainCard" onclick="cardAction()">Карт татах</div>
+            
+            <div class="card" id="mainCard" onclick="cardAction()">
+                <div class="card-face card-front" id="frontFace">Карт татах</div>
+                <div class="card-face card-back" id="backFace">Даалгавар энд гарна</div>
+            </div>
         </div>
     </div>
 
@@ -225,32 +251,35 @@
             if (!isRevealed) {
                 // Санамж гаргаж ирэх
                 if (confirm("Эргүүлэх гэж байна, итгэлтэй байна уу бро?")) {
-                    card.className = 'card revealed';
-                    card.innerHTML = `${currentTask}<div class="card-instruction">Дараагийн карт руу шилжих бол дарна уу</div>`;
+                    // Ар талын текстийг шинэчлэх
+                    document.getElementById('backFace').innerHTML = `${currentTask}<div class="card-instruction">Дараагийн карт руу шилжих бол дарна уу</div>`;
+                    
+                    // Картыг эргүүлэх класс нэмэх
+                    card.classList.add('flipped');
                     isRevealed = true;
                 }
             } else {
-                // Картыг алга болгох хөдөлгөөн
-                card.style.transform = 'scale(0.8) translateY(-50px)';
-                card.style.opacity = '0';
+                // Ил гарсан картыг дээш хөөрч алга болгох хөдөлгөөн
+                card.classList.add('slide-out');
 
                 setTimeout(() => {
                     // Шинэ даалгавар авах
                     getNextTask();
                     
-                    // Шинэ картыг шинээр гарч ирэх класс-тай буцааж авчрах
-                    card.className = 'card cover animate-in';
-                    card.innerText = 'Карт татах';
-                    card.style.transform = '';
-                    card.style.opacity = '1';
+                    // Картын анхны төлөвт шилжүүлэх (эргэлт болон хөдөлгөөнийг тэгшитгэх)
+                    card.className = 'card';
                     
-                    // Animation давтагдах боломжтой байх үүднээс классыг нь хугацааны дараа цэвэрлэх
-                    setTimeout(() => {
-                        card.classList.remove('animate-in');
-                    }, 400);
+                    // Шинэ карт шинээр гарч ирэх анимаци нэмэх
+                    card.classList.add('animate-in');
 
                     isRevealed = false;
-                }, 300);
+
+                    // Анимацийн хугацаа дуусахад классыг цэвэрлэх
+                    setTimeout(() => {
+                        card.classList.remove('animate-in');
+                    }, 500);
+
+                }, 500); // Хугацааг слайд гарах хөдөлгөөнтэй тааруулав
             }
         }
     </script>
