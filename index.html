@@ -99,6 +99,22 @@
             opacity: 0.7;
         }
 
+        /* Шинэ карт гарч ирэх Animation */
+        @keyframes drawCard {
+            0% {
+                transform: scale(0.7) translateY(50px);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-in {
+            animation: drawCard 0.4s ease-out forwards;
+        }
+
         /* Идэвхтэй дээд талын карт */
         .card {
             position: absolute;
@@ -114,7 +130,7 @@
             border: 3px solid #e94560;
             cursor: pointer;
             z-index: 1;
-            transition: transform 0.3s ease, background 0.3s ease;
+            transition: transform 0.3s ease, opacity 0.3s ease;
             user-select: none;
         }
 
@@ -207,12 +223,14 @@
             const card = document.getElementById('mainCard');
 
             if (!isRevealed) {
-                // Карт харагдахгүй (татах) төлөвтэй байвал дарж даалгаварыг гаргаж ирэх
-                card.className = 'card revealed';
-                card.innerHTML = `${currentTask}<div class="card-instruction">Дараагийн карт руу шилжих бол дарна уу</div>`;
-                isRevealed = true;
+                // Санамж гаргаж ирэх
+                if (confirm("Эргүүлэх гэж байна, итгэлтэй байна уу бро?")) {
+                    card.className = 'card revealed';
+                    card.innerHTML = `${currentTask}<div class="card-instruction">Дараагийн карт руу шилжих бол дарна уу</div>`;
+                    isRevealed = true;
+                }
             } else {
-                // Ил гарсан үед нь дарахад карт алга болж, дараагийн карт шинээр гарч ирэх
+                // Картыг алга болгох хөдөлгөөн
                 card.style.transform = 'scale(0.8) translateY(-50px)';
                 card.style.opacity = '0';
 
@@ -220,11 +238,17 @@
                     // Шинэ даалгавар авах
                     getNextTask();
                     
-                    // Шинэ картыг нууцлаг байдлаар буцааж авчрах
-                    card.className = 'card cover';
+                    // Шинэ картыг шинээр гарч ирэх класс-тай буцааж авчрах
+                    card.className = 'card cover animate-in';
                     card.innerText = 'Карт татах';
-                    card.style.transform = 'scale(1) translateY(0)';
+                    card.style.transform = '';
                     card.style.opacity = '1';
+                    
+                    // Animation давтагдах боломжтой байх үүднээс классыг нь хугацааны дараа цэвэрлэх
+                    setTimeout(() => {
+                        card.classList.remove('animate-in');
+                    }, 400);
+
                     isRevealed = false;
                 }, 300);
             }
